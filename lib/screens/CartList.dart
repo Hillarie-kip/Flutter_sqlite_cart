@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/colors.dart';
 import 'package:flutter_app/models/Cart.dart';
 import 'package:flutter_app/utils/database_helper.dart';
-import 'package:flutter_app/screens/note_detail.dart';
+import 'package:flutter_app/screens/CartDetail.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
