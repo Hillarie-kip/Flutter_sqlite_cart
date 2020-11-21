@@ -61,29 +61,29 @@ class DatabaseHelper {
 	}
 
 	// Fetch Operation: Get all note objects from database
-	Future<List<Map<String, dynamic>>> getNoteMapList() async {
+	Future<List<Map<String, dynamic>>> getCartMapList(String orderID) async {
 		Database db = await this.database;
 
 //		var result = await db.rawQuery('SELECT * FROM $noteTable order by $colPriority ASC');
-		var result = await db.query(orderItemTable, orderBy: '$colQuantity ASC');
+		var result = await db.query(orderItemTable,where:'$colOrderID= $orderID ' ,orderBy: '$colQuantity ASC');
 		return result;
 	}
 
 	// Insert Operation: Insert a Note object to database
-	Future<int> insertNote(Cart note) async {
+	Future<int> insertCart(Cart note) async {
 		Database db = await this.database;
 		var result = await db.insert(orderItemTable, note.toMap());
 		return result;
 	}
 
 	// Update Operation: Update a Note object and save it to database
-	Future<int> updateNote(Cart note) async {
+	Future<int> updateCart(Cart note) async {
 		var db = await this.database;
 		var result = await db.update(orderItemTable, note.toMap(), where: '$colID = ?', whereArgs: [note.id]);
 		return result;
 	}
 
-	Future<int> updateQuantityNote(int id,int newquantity) async {
+	Future<int> updateQuantityCart(int id,int newquantity) async {
 		var db = await this.database;
 		int result = await db.rawDelete('UPDATE  $orderItemTable SET $colQuantity=$newquantity WHERE $colID = $id');
 		return result;
@@ -91,14 +91,14 @@ class DatabaseHelper {
 
 
 	// Delete Operation: Delete a Note object from database
-	Future<int> deleteNote(int id) async {
+	Future<int> deleteCartItem(int id) async {
 		var db = await this.database;
 		int result = await db.rawDelete('DELETE FROM $orderItemTable WHERE $colID = $id');
 		return result;
 	}
 
 	// Get number of Note objects in database
-	Future<int> getCount() async {
+	Future<int> getCartCount() async {
 		Database db = await this.database;
 		List<Map<String, dynamic>> x = await db.rawQuery('SELECT COUNT (*) from $orderItemTable');
 		int result = Sqflite.firstIntValue(x);
@@ -119,9 +119,9 @@ class DatabaseHelper {
 	}
 
 	// Get the 'Map List' [ List<Map> ] and convert it to 'Note List' [ List<Note> ]
-	Future<List<Cart>> getNoteList() async {
+	Future<List<Cart>> getNoteList(String orderID) async {
 
-		var noteMapList = await getNoteMapList(); // Get 'Map List' from database
+		var noteMapList = await getCartMapList(orderID); // Get 'Map List' from database
 		int count = noteMapList.length;         // Count the number of map entries in db table
 
 		List<Cart> noteList = List<Cart>();

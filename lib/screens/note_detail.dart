@@ -205,9 +205,9 @@ class NoteDetailState extends State<NoteDetail> {
 		note.dateTime = DateFormat.yMMMd().format(DateTime.now());
 		int result;
 		if (note.id != null) {  // Case 1: Update operation
-			result = await helper.updateNote(note);
+			result = await helper.updateCart(note);
 		} else { // Case 2: Insert Operation
-			result = await helper.insertNote(note);
+			result = await helper.insertCart(note);
 		}
 
 		if (result != 0) {  // Success
@@ -228,7 +228,7 @@ class NoteDetailState extends State<NoteDetail> {
 		}
 
 		// Case 2: User is trying to delete the old note that already has a valid ID.
-		int result = await helper.deleteNote(note.id);
+		int result = await helper.deleteCartItem(note.id);
 		if (result != 0) {
 			_showAlertDialog('Status', 'Note Deleted Successfully');
 		} else {
