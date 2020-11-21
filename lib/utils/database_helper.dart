@@ -116,9 +116,10 @@ class DatabaseHelper {
 		List<Map<String, dynamic>> x = await db.rawQuery('SELECT SUM(Quantity*ProductPrice) from $orderItemTable');
 		int result = Sqflite.firstIntValue(x);
 		return result;
+
 	}
 
-	// Get the 'Map List' [ List<Map> ] and convert it to 'Note List' [ List<Note> ]
+	// Get the 'Map List' [ List<Map> ] and convert it to 'Product List' [ List<Product> ]
 	Future<List<Cart>> getNoteList(String orderID) async {
 
 		var noteMapList = await getCartMapList(orderID); // Get 'Map List' from database

@@ -9,19 +9,19 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 
-class NoteList extends StatefulWidget {
+class CartList extends StatefulWidget {
 
 	@override
   State<StatefulWidget> createState() {
 
-    return NoteListState();
+    return CartListState();
   }
 }
 
-class NoteListState extends State<NoteList> {
+class CartListState extends State<CartList> {
 
 	DatabaseHelper databaseHelper = DatabaseHelper();
-	List<Cart> noteList;
+	List<Cart> cartList;
 	int count = 0;
 
 
@@ -34,8 +34,8 @@ class NoteListState extends State<NoteList> {
 	ScrollController scrollController = ScrollController();
 	@override
   Widget build(BuildContext context) {
-		if (noteList == null) {
-			noteList = List<Cart>();
+		if (cartList == null) {
+			cartList = List<Cart>();
 			updateListView();
 		}
 		
@@ -63,15 +63,8 @@ class NoteListState extends State<NoteList> {
 							gridDelegate:
 							SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
 							delegate: SliverChildListDelegate(
-								[
-									Expanded(child: noteList != null && noteList.length > 0
-											? new ProviderView(property: noteList,databaseHelper:this.databaseHelper)
-											: noteList == null
-											? new Center(child: new CircularProgressIndicator())
-											: new Center(
-										child: new Text("No record match!"),
-									),
-									)
+					[
+									getNoteListView()
 
 								],
 							),
@@ -79,8 +72,7 @@ class NoteListState extends State<NoteList> {
 						SliverList(
 							delegate: SliverChildListDelegate(
 								[
-
-
+									
 									SizedBox(
 										height: 10,
 									),
@@ -107,6 +99,7 @@ class NoteListState extends State<NoteList> {
 										height: 10,
 									),
 									PaymentMethodWidget(),
+									checkoutButton(context,cartList)
 								],
 							),
 						),
@@ -137,128 +130,6 @@ class NoteListState extends State<NoteList> {
 
 
 
-/*
-  ListView getNoteListView() {
-
-		TextStyle titleStyle = Theme.of(context).textTheme.subhead;
-
-		return ListView.builder(
-
-
-			itemCount: count,
-			itemBuilder: (BuildContext context, int position) {
-				return	CartItem( productName: "Grilled Salmon",
-				productPrice: "\$96.00",
-				productImage: noteList[position].productImage,
-				productCartQuantity: noteList[position].quantity);
-				return Card(
-					color: Colors.white,
-					elevation: 2.0,
-					child:
-					Row(
-						mainAxisAlignment: MainAxisAlignment.spaceBetween,
-						crossAxisAlignment: CrossAxisAlignment.start,
-						children: <Widget>[
-							Flexible(
-								flex: 3,
-								fit: FlexFit.tight,
-								child: ClipRRect(
-									borderRadius: BorderRadius.all(Radius.circular(16)),
-									child: Image.network(noteList[position].productImage),
-								),
-							),
-							Flexible(
-								flex: 5,
-								child: Column(
-									crossAxisAlignment: CrossAxisAlignment.center,
-									mainAxisAlignment: MainAxisAlignment.spaceBetween,
-									children: <Widget>[
-										Container(
-											height: 50,
-											child: Text(
-												noteList[position].productName,
-												style: titleStyle,
-												textAlign: TextAlign.center,
-											),
-										),
-										Row(
-											mainAxisSize: MainAxisSize.max,
-											crossAxisAlignment: CrossAxisAlignment.center,
-											mainAxisAlignment: MainAxisAlignment.center,
-											children: <Widget>[
-												InkWell(
-													onTap: () => _RemoveQuantity(context,noteList[position],noteList[position].quantity--),
-													child: Icon(Icons.remove_circle),
-												),
-												Padding(
-													padding: EdgeInsets.symmetric(horizontal: 16.0),
-													child: Text('${noteList[position].quantity.toString()}', style: titleStyle),
-												),
-												InkWell(
-													onTap: () => _AddQuantity(context,noteList[position],noteList[position].quantity++),
-													child: Icon(Icons.add_circle),
-												),
-											],
-										)
-									],
-								),
-							),
-							Flexible(
-								flex: 2,
-								child: Column(
-									crossAxisAlignment: CrossAxisAlignment.end,
-									mainAxisAlignment: MainAxisAlignment.spaceBetween,
-									children: <Widget>[
-										Container(
-											height: 40,
-											width: 70,
-											child: Text(
-												'\$ ${noteList[position].quantity*noteList[position].productPrice}',
-												style: titleStyle,
-												textAlign: TextAlign.end,
-											),
-										),
-										Card(
-											shape: roundedRectangle,
-											color: mainColor,
-											child: InkWell(
-											onTap: () =>  _delete(context,noteList[position]),
-												customBorder: roundedRectangle,
-												child: Icon(Icons.close),
-											),
-										)
-									],
-								),
-							),
-						],
-
-
-					),
-				);
-			},
-		);
-  }*/
-
-	Future<Widget> buildPriceInfo(BuildContext context) async {
-		final titleStyle2 = TextStyle(fontSize: 18, color: Colors.black45);
-		double total = 0;
-
-		int result = await databaseHelper.getTotalPrice("1");
-		if (result != 0) {
-			_showSnackBar(context, 'Note Deleted Successfully');
-			updateListView();
-		}
-
-		return Row(
-			mainAxisAlignment: MainAxisAlignment.spaceBetween,
-			children: <Widget>[
-
-				Text('Total:', style: titleStyle2),
-			//	Text('\$ ${property.length}'),
-			],
-		);
-	}
-
 	Widget checkoutButton(cart, context) {
 		final titleStyle1 = TextStyle(fontSize: 16);
 		return Container(
@@ -274,92 +145,6 @@ class NoteListState extends State<NoteList> {
 			),
 		);
 	}
-
-	Widget buildCartItemList( Cart cart) {
-		var titleStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-		return Container(
-			margin: EdgeInsets.only(bottom: 16),
-			child: Row(
-				mainAxisAlignment: MainAxisAlignment.spaceBetween,
-				crossAxisAlignment: CrossAxisAlignment.start,
-				children: <Widget>[
-					Flexible(
-						flex: 3,
-						fit: FlexFit.tight,
-						child: ClipRRect(
-							borderRadius: BorderRadius.all(Radius.circular(16)),
-							child: Image.network(cart.productImage),
-						),
-					),
-					Flexible(
-						flex: 5,
-						child: Column(
-							crossAxisAlignment: CrossAxisAlignment.center,
-							mainAxisAlignment: MainAxisAlignment.spaceBetween,
-							children: <Widget>[
-								Container(
-									height: 50,
-									child: Text(
-										cart.productName,
-										style: titleStyle,
-										textAlign: TextAlign.center,
-									),
-								),
-								Row(
-									mainAxisSize: MainAxisSize.max,
-									crossAxisAlignment: CrossAxisAlignment.center,
-									mainAxisAlignment: MainAxisAlignment.center,
-									children: <Widget>[
-										InkWell(
-										//	onTap: () => cart.removeItem(cartModel),
-											child: Icon(Icons.remove_circle),
-										),
-										Padding(
-											padding: EdgeInsets.symmetric(horizontal: 16.0),
-											child: Text('${cart.quantity}', style: titleStyle),
-										),
-										InkWell(
-											//onTap: () => cart.increaseItem(cartModel),
-											child: Icon(Icons.add_circle),
-										),
-									],
-								)
-							],
-						),
-					),
-					Flexible(
-						flex: 2,
-						child: Column(
-							crossAxisAlignment: CrossAxisAlignment.end,
-							mainAxisAlignment: MainAxisAlignment.spaceBetween,
-							children: <Widget>[
-								Container(
-									height: 40,
-									width: 70,
-									child: Text(
-										'\$ ${cart.productPrice}',
-										style: titleStyle,
-										textAlign: TextAlign.end,
-									),
-								),
-								Card(
-									shape: roundedRectangle,
-									color: mainColor,
-									child: InkWell(
-									//	onTap: () => cart.removeAllInList(cartModel.food),
-										customBorder: roundedRectangle,
-										child: Icon(Icons.close),
-									),
-								)
-							],
-						),
-					),
-				],
-			),
-		);
-	}
-
-
 
 	void _delete(BuildContext context, Cart note) async {
 
@@ -388,7 +173,7 @@ class NoteListState extends State<NoteList> {
 
   void navigateToDetail(Cart note, String title) async {
 	  bool result = await Navigator.push(context, MaterialPageRoute(builder: (context) {
-		  return NoteDetail(note, title);
+		  return CartDetail(note, title);
 	  }));
 
 	  if (result == true) {
@@ -404,156 +189,116 @@ class NoteListState extends State<NoteList> {
 			Future<List<Cart>> noteListFuture = databaseHelper.getNoteList("123456");
 			noteListFuture.then((noteList) {
 				setState(() {
-				  this.noteList = noteList;
+				  this.cartList = noteList;
 				  this.count = noteList.length;
 				});
 			});
 		});
   }
 
+  ListView getNoteListView() {
+
+		TextStyle titleStyle = Theme.of(context).textTheme.subhead;
+
+		return ListView.builder(
 
 
-
-
-}
-class ProviderView extends StatelessWidget {
-	final List<Cart> property;
-  final DatabaseHelper databaseHelper;
-	const ProviderView({Key key, this.property, this.databaseHelper}) : super(key: key);
-
-
-
-	@override
-	Widget build(BuildContext context) {
-		return new GridView.builder(
-				shrinkWrap: true,
-				gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-					crossAxisCount: 1,
-					crossAxisSpacing: 10.0,
-					mainAxisSpacing: 10.0,
-					childAspectRatio: MediaQuery.of(context).size.width /
-							(MediaQuery.of(context).size.height / 5),
-				),
-				itemCount: property == null ? 0 : property.length,
-				itemBuilder: (BuildContext context, int index) {
-					return new InkWell(
-						//splashColor: AppColors.PrimaryColor,
-						onTap: () {
-						/*	Navigator.push(
-								context,
-								MaterialPageRoute(
-										builder: (context) => SingleProviderScreen(this.property[index])),
-							);*/
-							//   Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => DetailScreen(this.property)), (Route<dynamic> route) => false);
-						},
-						child:
-						Container(
-						width: double.infinity,
-						height: 50,
-						decoration: BoxDecoration(boxShadow: [
-						BoxShadow(
-						color: Color(0xFFfae3e2).withOpacity(0.3),
-						spreadRadius: 1,
-						blurRadius: 1,
-						offset: Offset(0, 1),
-						),
-						]),
-						child:
-
-
-						Card(
-							color: Colors.green,
-							elevation: 2.0,
-
-							child:
-							Row(
-								mainAxisAlignment: MainAxisAlignment.spaceBetween,
-								crossAxisAlignment: CrossAxisAlignment.start,
-								children: <Widget>[
-									Flexible(
-										flex: 1,
-										fit: FlexFit.tight,
-										child: ClipRRect(
-											borderRadius: BorderRadius.all(Radius.circular(16)),
-											child: Image.network(property[index].productImage),
-										),
-									),
-									Flexible(
-										flex: 5,
-										child: Column(
-											crossAxisAlignment: CrossAxisAlignment.center,
-											mainAxisAlignment: MainAxisAlignment.spaceBetween,
-											children: <Widget>[
-												Container(
-													height: 50,
-													child: Text(
-														property[index].orderID,
-														textAlign: TextAlign.center,
-													),
-												),
-												Row(
-													mainAxisSize: MainAxisSize.max,
-													crossAxisAlignment: CrossAxisAlignment.center,
-													mainAxisAlignment: MainAxisAlignment.center,
-													children: <Widget>[
-														InkWell(
-															onTap: () => _RemoveQuantity(context,property[index],property[index].quantity--),
-															child: Icon(Icons.remove_circle),
-														),
-														Padding(
-															padding: EdgeInsets.symmetric(horizontal: 16.0),
-															child: Text('${property[index].quantity.toString()}'),
-														),
-														InkWell(
-															onTap: () => _AddQuantity(context,property[index],property[index].quantity++),
-															child: Icon(Icons.add_circle),
-														),
-													],
-												)
-											],
-										),
-									),
-									Flexible(
-										flex: 2,
-										child: Column(
-											crossAxisAlignment: CrossAxisAlignment.end,
-											mainAxisAlignment: MainAxisAlignment.spaceBetween,
-											children: <Widget>[
-												Container(
-													child: Text(
-														'\$ ${property[index].quantity*property[index].productPrice}',
-														textAlign: TextAlign.end,
-													),
-												),
-												Card(
-													shape: roundedRectangle,
-													color: mainColor,
-													child: InkWell(
-														onTap: () =>  _delete(context,property[index]),
-														customBorder: roundedRectangle,
-														child: Icon(Icons.close),
-													),
-												)
-											],
-										),
-									),
-								],
-
-
+			itemCount: count,
+			itemBuilder: (BuildContext context, int position) {
+				return Card(
+					color: Colors.white,
+					elevation: 2.0,
+					child:
+					Row(
+						mainAxisAlignment: MainAxisAlignment.spaceBetween,
+						crossAxisAlignment: CrossAxisAlignment.start,
+						children: <Widget>[
+							Flexible(
+								flex: 3,
+								fit: FlexFit.tight,
+								child: ClipRRect(
+									borderRadius: BorderRadius.all(Radius.circular(16)),
+									child: Image.network(cartList[position].productImage),
+								),
 							),
-						),
-						)
-						);
+							Flexible(
+								flex: 5,
+								child: Column(
+									crossAxisAlignment: CrossAxisAlignment.center,
+									mainAxisAlignment: MainAxisAlignment.spaceBetween,
+									children: <Widget>[
+										Container(
+											height: 50,
+											child: Text(
+												cartList[position].productName,
+												style: titleStyle,
+												textAlign: TextAlign.center,
+											),
+										),
+										Row(
+											mainAxisSize: MainAxisSize.max,
+											crossAxisAlignment: CrossAxisAlignment.center,
+											mainAxisAlignment: MainAxisAlignment.center,
+											children: <Widget>[
+												InkWell(
+													onTap: () => _RemoveQuantity(context,cartList[position],cartList[position].quantity--),
+													child: Icon(Icons.remove_circle),
+												),
+												Padding(
+													padding: EdgeInsets.symmetric(horizontal: 16.0),
+													child: Text('${cartList[position].quantity.toString()}', style: titleStyle),
+												),
+												InkWell(
+													onTap: () => _AddQuantity(context,cartList[position],cartList[position].quantity++),
+													child: Icon(Icons.add_circle),
+												),
+											],
+										)
+									],
+								),
+							),
+							Flexible(
+								flex: 2,
+								child: Column(
+									crossAxisAlignment: CrossAxisAlignment.end,
+									mainAxisAlignment: MainAxisAlignment.spaceBetween,
+									children: <Widget>[
+										Container(
+											height: 40,
+											width: 70,
+											child: Text(
+												'\$ ${cartList[position].quantity*cartList[position].productPrice}',
+												style: titleStyle,
+												textAlign: TextAlign.end,
+											),
+										),
+										Card(
+											shape: roundedRectangle,
+											color: mainColor,
+											child: InkWell(
+											onTap: () =>  _delete(context,cartList[position]),
+												customBorder: roundedRectangle,
+												child: Icon(Icons.close),
+											),
+										)
+									],
+								),
+							),
+						],
 
-				});
-	}
-	
-	void _AddQuantity(BuildContext context, Cart note,int quantity) async {
 
-		int result = await databaseHelper.updateQuantityCart(note.id,note.quantity++);
+					),
+				);
+			},
+		);
+  }
+
+	void _AddQuantity(BuildContext context, Cart cartlist,int quantity) async {
+
+		int result = await databaseHelper.updateQuantityCart(cartlist.id,cartlist.quantity++);
 		if (result != 0) {
-			_showSnackBar(context, note.productName+' added to cart');
-		//	updateListView();
+			_showSnackBar(context, cartlist.productName+' added to cart');
+			updateListView();
 		}
 	}
 	void _RemoveQuantity(BuildContext context, Cart note,int quantity) async {
@@ -565,31 +310,8 @@ class ProviderView extends StatelessWidget {
 					note.id, note.quantity--);
 			if (result != 0) {
 				_showSnackBar(context, note.productName+' removed from cart');
-			//	updateListView();
+				//	updateListView();
 			}
-		}
-	}
-	void _showSnackBar(BuildContext context, String message) {
-
-		final snackBar = SnackBar(content: Text(message),
-				backgroundColor: Colors.blue,
-				behavior: SnackBarBehavior.fixed,
-				shape: RoundedRectangleBorder(
-						borderRadius: BorderRadius.circular(10),
-						side: BorderSide(
-							color: Colors.blue,
-							width: 2,
-						)));
-
-		Scaffold.of(context).showSnackBar(snackBar);
-	}
-
-	void _delete(BuildContext context, Cart note) async {
-
-		int result = await databaseHelper.deleteCartItem(note.id);
-		if (result != 0) {
-			_showSnackBar(context, 'Note Deleted Successfully');
-		//	updateListView();
 		}
 	}
 
@@ -748,123 +470,6 @@ class PromoCodeWidget extends StatelessWidget {
 									})),
 				),
 			),
-		);
-	}
-}
-
-class CartItem extends StatelessWidget {
-	String productName;
-	String productPrice;
-	String productImage;
-	int productCartQuantity;
-
-	CartItem({
-		Key key,
-		@required this.productName,
-		@required this.productPrice,
-		@required this.productImage,
-		@required this.productCartQuantity,
-	}) : super(key: key);
-
-	@override
-	Widget build(BuildContext context) {
-		return Container(
-			width: double.infinity,
-			height: 130,
-			decoration: BoxDecoration(boxShadow: [
-				BoxShadow(
-					color: Color(0xFFfae3e2).withOpacity(0.3),
-					spreadRadius: 1,
-					blurRadius: 1,
-					offset: Offset(0, 1),
-				),
-			]),
-			child: Card(
-					color: Colors.white,
-					elevation: 0,
-					shape: RoundedRectangleBorder(
-						borderRadius: const BorderRadius.all(
-							Radius.circular(5.0),
-						),
-					),
-					child: Container(
-						alignment: Alignment.center,
-						padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
-						child: Row(
-							mainAxisSize: MainAxisSize.max,
-							children: <Widget>[
-								Container(
-									child: Align(
-										alignment: Alignment.centerLeft,
-										child: Center(
-												child: Image.asset(
-													"assets/images/icons/service.png",
-													width: 110,
-													height: 100,
-												)),
-									),
-								),
-								Column(
-									mainAxisSize: MainAxisSize.max,
-									crossAxisAlignment: CrossAxisAlignment.center,
-									children: <Widget>[
-										SizedBox(
-											height: 5,
-										),
-										Row(
-											mainAxisAlignment: MainAxisAlignment.spaceAround,
-											children: <Widget>[
-												Column(
-													crossAxisAlignment: CrossAxisAlignment.start,
-													children: <Widget>[
-														Container(
-															child: Text(
-																"$productName",
-																style: TextStyle(
-																		fontSize: 18,
-																		color: Color(0xFF3a3a3b),
-																		fontWeight: FontWeight.w400),
-																textAlign: TextAlign.left,
-															),
-														),
-														SizedBox(
-															height: 5,
-														),
-														Container(
-															child: Text(
-																"$productPrice",
-																style: TextStyle(
-																		fontSize: 18,
-																		color: Color(0xFF3a3a3b),
-																		fontWeight: FontWeight.w400),
-																textAlign: TextAlign.left,
-															),
-														),
-													],
-												),
-												SizedBox(
-													width: 40,
-												),
-												Container(
-													alignment: Alignment.centerRight,
-													child: Image.asset(
-														"assets/images/menus/ic_delete.png",
-														width: 25,
-														height: 25,
-													),
-												)
-											],
-										),
-										Container(
-											margin: EdgeInsets.only(left: 20),
-											alignment: Alignment.centerRight,
-											child: AddToCartMenu(2),
-										)
-									],
-								)
-							],
-						),
-					)),
 		);
 	}
 }

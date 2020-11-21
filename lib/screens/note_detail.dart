@@ -4,40 +4,40 @@ import 'package:flutter_app/models/Cart.dart';
 import 'package:flutter_app/utils/database_helper.dart';
 import 'package:intl/intl.dart';
 
-class NoteDetail extends StatefulWidget {
+class CartDetail extends StatefulWidget {
 
 	final String appBarTitle;
-	final Cart note;
+	final Cart cartItem;
 
-	NoteDetail(this. note, this.appBarTitle);
+	CartDetail(this. cartItem, this.appBarTitle);
 
 	@override
   State<StatefulWidget> createState() {
 
-    return NoteDetailState(this.note, this.appBarTitle);
+    return CartDetailState(this.cartItem, this.appBarTitle);
   }
 }
 
-class NoteDetailState extends State<NoteDetail> {
+class CartDetailState extends State<CartDetail> {
 
 	DatabaseHelper helper = DatabaseHelper();
 
 	String appBarTitle;
-	Cart note;
+	Cart cartItem;
 
 	TextEditingController titleController = TextEditingController();
 	TextEditingController descriptionController = TextEditingController();
 	TextEditingController quantityController = TextEditingController();
 
-	NoteDetailState(this.note, this.appBarTitle);
+	CartDetailState(this.cartItem, this.appBarTitle);
 
 	@override
   Widget build(BuildContext context) {
 
 		TextStyle textStyle = Theme.of(context).textTheme.title;
 
-		titleController.text = note.productName;
-		descriptionController.text = note.providerName;
+		titleController.text = cartItem.productName;
+		descriptionController.text = cartItem.providerName;
 
     return WillPopScope(
 
@@ -184,17 +184,17 @@ class NoteDetailState extends State<NoteDetail> {
 	// Convert int priority to String priority and display it to user in DropDown
 
 	void updateQuantity(){
-		note.quantity = quantityController.text as int;
+		cartItem.quantity = quantityController.text as int;
 	}
 
 	// Update the title of Note object
   void updateTitle(){
-    note.productName = titleController.text;
+    cartItem.productName = titleController.text;
   }
 
 	// Update the description of Note object
 	void updateDescription() {
-		note.providerName = descriptionController.text;
+		cartItem.providerName = descriptionController.text;
 	}
 
 	// Save data to database
@@ -202,16 +202,16 @@ class NoteDetailState extends State<NoteDetail> {
 
 		moveToLastScreen();
 
-		note.dateTime = DateFormat.yMMMd().format(DateTime.now());
+		cartItem.dateTime = DateFormat.yMMMd().format(DateTime.now());
 		int result;
-		if (note.id != null) {  // Case 1: Update operation
-			result = await helper.updateCart(note);
+		if (cartItem.id != null) {  // Case 1: Update operation
+			result = await helper.updateCart(cartItem);
 		} else { // Case 2: Insert Operation
-			result = await helper.insertCart(note);
+			result = await helper.insertCart(cartItem);
 		}
 
 		if (result != 0) {  // Success
-			_showAlertDialog('Status', 'Note Saved Successfully');
+			_showAlertDialog('Status', 'Product Saved Successfully');
 		} else {  // Failure
 			_showAlertDialog('Status', 'Problem Saving Note');
 		}
@@ -222,17 +222,17 @@ class NoteDetailState extends State<NoteDetail> {
 		moveToLastScreen();
 		// Case 1: If user is trying to delete the NEW NOTE i.e. he has come to
 		// the detail page by pressing the FAB of NoteList page.
-		if (note.id == null) {
-			_showAlertDialog('Status', 'No Note was deleted');
+		if (cartItem.id == null) {
+			_showAlertDialog('Status', 'No Product was deleted');
 			return;
 		}
 
 		// Case 2: User is trying to delete the old note that already has a valid ID.
-		int result = await helper.deleteCartItem(note.id);
+		int result = await helper.deleteCartItem(cartItem.id);
 		if (result != 0) {
-			_showAlertDialog('Status', 'Note Deleted Successfully');
+			_showAlertDialog('Status', 'Product Deleted Successfully');
 		} else {
-			_showAlertDialog('Status', 'Error Occured while Deleting Note');
+			_showAlertDialog('Status', 'Error Occured while Deleting Product');
 		}
 	}
 
@@ -242,11 +242,16 @@ class NoteDetailState extends State<NoteDetail> {
 			title: Text(title),
 			content: Text(message),
 		);
+		Future.delayed(Duration(seconds: 5), () {
+			Navigator.of(context).pop(true);
+		});
 		showDialog(
 				context: context,
 				builder: (_) => alertDialog
 		);
 	}
+
+	
 
 }
 
