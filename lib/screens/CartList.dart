@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/constants/colors.dart';
+import 'package:flutter_app/constants/Constants.dart';
 import 'package:flutter_app/models/Cart.dart';
+import 'package:flutter_app/utils/cartIconWithBadge.dart';
 import 'package:flutter_app/utils/database_helper.dart';
 import 'package:flutter_app/screens/CartDetail.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
+
+import 'CheckOutPage.dart';
 
 
 class CartList extends StatefulWidget {
@@ -42,16 +46,10 @@ class CartListState extends State<CartList> {
 		return Scaffold(
 			appBar: AppBar(
 				// leading: Icon(Icons.toc),
-					backgroundColor: Colors.green,
+					backgroundColor: AppColors.PrimaryDarkColor,
 					title: Text("MyHome"),
 					actions: <Widget>[
-			IconButton(icon: Icon(Icons.filter_list),
-			color: Colors.green,
-			splashColor: Colors.green,
-			highlightColor: Colors.green,
-			onPressed: ()  {
-
-				})
+			cartIconWithBadge()
 		]
 
 		),
@@ -72,7 +70,8 @@ class CartListState extends State<CartList> {
 						SliverList(
 							delegate: SliverChildListDelegate(
 								[
-									
+									createSubTitle(),
+
 									SizedBox(
 										height: 10,
 									),
@@ -80,27 +79,11 @@ class CartListState extends State<CartList> {
 									SizedBox(
 										height: 10,
 									),
-									TotalCalculationWidget(),
+									footer(context),
 									SizedBox(
 										height: 10,
 									),
-									Container(
-										padding: EdgeInsets.only(left: 5),
-										child: Text(
-											"Payment Method",
-											style: TextStyle(
-													fontSize: 20,
-													color: Color(0xFF3a3a3b),
-													fontWeight: FontWeight.w600),
-											textAlign: TextAlign.left,
-										),
-									),
-									SizedBox(
-										height: 10,
-									),
-									PaymentMethodWidget(),
-									checkoutButton(context,cartList)
-								],
+									],
 							),
 						),
 
@@ -113,7 +96,7 @@ class CartListState extends State<CartList> {
 	    floatingActionButton: FloatingActionButton(
 		    onPressed: () {
 		      debugPrint('FAB clicked');
-		      navigateToDetail(Cart('123456', 1,'Hilla Restaurant', 2,'Pizza','12345',2000,1,''), 'Add Cart');
+		      navigateToDetail(Cart('123456', 1,'Hilla Restaurant', 2,'Pizza','123',2000,1,''), 'Add Cart');
 		    },
 
 		    tooltip: 'Add Cart',
@@ -130,21 +113,6 @@ class CartListState extends State<CartList> {
 
 
 
-	Widget checkoutButton(cart, context) {
-		final titleStyle1 = TextStyle(fontSize: 16);
-		return Container(
-			margin: EdgeInsets.only(top: 16, bottom: 64),
-			child: Center(
-				child: RaisedButton(
-					child: Text('Checkout', style: titleStyle1),
-					onPressed: () {},
-					padding: EdgeInsets.symmetric(horizontal: 64, vertical: 12),
-					color: mainColor,
-					shape: StadiumBorder(),
-				),
-			),
-		);
-	}
 
 	void _delete(BuildContext context, Cart note) async {
 
@@ -159,12 +127,12 @@ class CartListState extends State<CartList> {
 	void _showSnackBar(BuildContext context, String message) {
 
 		final snackBar = SnackBar(content: Text(message),
-			backgroundColor: Colors.blue,
+			backgroundColor: AppColors.colorAccent,
 				behavior: SnackBarBehavior.fixed,
 				shape: RoundedRectangleBorder(
 						borderRadius: BorderRadius.circular(10),
 						side: BorderSide(
-							color: Colors.blue,
+							color: AppColors.colorAccent,
 							width: 2,
 						)));
 
@@ -196,13 +164,10 @@ class CartListState extends State<CartList> {
 		});
   }
 
-  ListView getNoteListView() {
+	Widget getNoteListView() {
 
-		TextStyle titleStyle = Theme.of(context).textTheme.subhead;
 
 		return ListView.builder(
-
-
 			itemCount: count,
 			itemBuilder: (BuildContext context, int position) {
 				return Card(
@@ -210,28 +175,41 @@ class CartListState extends State<CartList> {
 					elevation: 2.0,
 					child:
 					Row(
+
 						mainAxisAlignment: MainAxisAlignment.spaceBetween,
 						crossAxisAlignment: CrossAxisAlignment.start,
 						children: <Widget>[
 							Flexible(
-								flex: 3,
+								flex: 4,
 								fit: FlexFit.tight,
 								child: ClipRRect(
 									borderRadius: BorderRadius.all(Radius.circular(16)),
-									child: Image.network(cartList[position].productImage),
+									child: Image.network(URLs.URL_SERVICEPRODUCTIMAGE+cartList[position].productImage),
 								),
 							),
 							Flexible(
-								flex: 5,
+								flex: 4,
 								child: Column(
 									crossAxisAlignment: CrossAxisAlignment.center,
 									mainAxisAlignment: MainAxisAlignment.spaceBetween,
 									children: <Widget>[
 										Container(
+											height: 30,
+											child: Text(cartList[position].productName,
+												style: GoogleFonts.poppins(
+														textStyle: TextStyle(
+																color: AppColors.PrimaryDarkColor,
+																fontSize: 18)),
+												textAlign: TextAlign.center,
+											),
+										),
+										Container(
 											height: 50,
-											child: Text(
-												cartList[position].productName,
-												style: titleStyle,
+											child: Text("provider : "+cartList[position].providerName,
+												style: GoogleFonts.poppins(
+														textStyle: TextStyle(
+																color: AppColors.colorAccent,
+																fontSize: 14)),
 												textAlign: TextAlign.center,
 											),
 										),
@@ -242,43 +220,59 @@ class CartListState extends State<CartList> {
 											children: <Widget>[
 												InkWell(
 													onTap: () => _RemoveQuantity(context,cartList[position],cartList[position].quantity--),
-													child: Icon(Icons.remove_circle),
+													child: Icon(Icons.remove_circle,color: AppColors.colorAccent,),
 												),
 												Padding(
 													padding: EdgeInsets.symmetric(horizontal: 16.0),
-													child: Text('${cartList[position].quantity.toString()}', style: titleStyle),
+													child: Text('${cartList[position].quantity.toString()}', 	style: GoogleFonts.poppins(
+															textStyle: TextStyle(
+																	color: AppColors.PrimaryDarkColor,
+																	fontSize: 15)),),
 												),
 												InkWell(
 													onTap: () => _AddQuantity(context,cartList[position],cartList[position].quantity++),
-													child: Icon(Icons.add_circle),
+													child: Icon(Icons.add_circle,color:AppColors.colorAccent),
 												),
 											],
-										)
+										),
+
+
+										Container(
+
+											height: 50,
+											child: Text('\KES${cartList[position].quantity*cartList[position].productPrice}',
+												style: GoogleFonts.poppins(
+														textStyle: TextStyle(
+																color: AppColors.colorAccent,
+																fontSize: 14)),
+												textAlign: TextAlign.center,
+											),
+										),
 									],
 								),
 							),
 							Flexible(
-								flex: 2,
+								flex: 5,
 								child: Column(
 									crossAxisAlignment: CrossAxisAlignment.end,
-									mainAxisAlignment: MainAxisAlignment.spaceBetween,
+									mainAxisAlignment: MainAxisAlignment.end,
 									children: <Widget>[
 										Container(
 											height: 40,
-											width: 70,
+											width: 80,
 											child: Text(
-												'\$ ${cartList[position].quantity*cartList[position].productPrice}',
-												style: titleStyle,
+												'\KES ${cartList[position].quantity*cartList[position].productPrice}',
+													style: GoogleFonts.poppins(
+											textStyle: TextStyle(
+											color: AppColors.PrimaryDarkColor,
+													fontSize: 15)),
 												textAlign: TextAlign.end,
 											),
 										),
 										Card(
-											shape: roundedRectangle,
-											color: mainColor,
 											child: InkWell(
 											onTap: () =>  _delete(context,cartList[position]),
-												customBorder: roundedRectangle,
-												child: Icon(Icons.close),
+												child: Icon(Icons.delete_forever,color: AppColors.red,),
 											),
 										)
 									],
@@ -293,151 +287,79 @@ class CartListState extends State<CartList> {
 		);
   }
 
-	void _AddQuantity(BuildContext context, Cart cartlist,int quantity) async {
-
-		int result = await databaseHelper.updateQuantityCart(cartlist.id,cartlist.quantity++);
-		if (result != 0) {
-			_showSnackBar(context, cartlist.productName+' added to cart');
-			updateListView();
-		}
-	}
-	void _RemoveQuantity(BuildContext context, Cart note,int quantity) async {
-		if (note.quantity <= 0) {
-			_delete(context,note);
-		}
-		else {
-			int result = await databaseHelper.updateQuantityCart(
-					note.id, note.quantity--);
-			if (result != 0) {
-				_showSnackBar(context, note.productName+' removed from cart');
-				//	updateListView();
-			}
-		}
-	}
 
 
-
-}
-
-
-class PaymentMethodWidget extends StatelessWidget {
-	@override
-	Widget build(BuildContext context) {
+	createSubTitle() {
 		return Container(
-			alignment: Alignment.center,
-			width: double.infinity,
-			height: 60,
-			decoration: BoxDecoration(boxShadow: [
-				BoxShadow(
-					color: Color(0xFFfae3e2).withOpacity(0.1),
-					spreadRadius: 1,
-					blurRadius: 1,
-					offset: Offset(0, 1),
-				),
-			]),
-			child: Card(
-				color: Colors.white,
-				elevation: 0,
-				shape: RoundedRectangleBorder(
-					borderRadius: const BorderRadius.all(
-						Radius.circular(5.0),
-					),
-				),
-				child: Container(
-					alignment: Alignment.center,
-					padding: EdgeInsets.only(left: 10, right: 30, top: 10, bottom: 10),
-					child: Row(
+			alignment: Alignment.topLeft,
+			child: Text(
+				"Total Items : "+cartList.length.toString(),	style: GoogleFonts.poppins(
+					textStyle: TextStyle(
+							color: AppColors.colorAccent,
+							fontSize: 14)),
+				textAlign: TextAlign.center,
+			),
+			margin: EdgeInsets.only(left: 12, top: 4),
+		);
+	}
+	footer(BuildContext context) {
+		return Container(
+			child: Column(
+				crossAxisAlignment: CrossAxisAlignment.center,
+				mainAxisAlignment: MainAxisAlignment.end,
+				children: <Widget>[
+					Row(
+						mainAxisAlignment: MainAxisAlignment.spaceBetween,
 						children: <Widget>[
 							Container(
-								alignment: Alignment.center,
-								child: Image.asset(
-									"assets/images/menus/ic_credit_card.png",
-									width: 50,
-									height: 50,
+								margin: EdgeInsets.only(left: 30),
+								child: Text(
+									"Total",
+									style: GoogleFonts.poppins(
+											textStyle: TextStyle(
+													color: AppColors.colorAccent,
+													fontSize: 14)),
+									textAlign: TextAlign.center,
 								),
 							),
-							Text(
-								"Credit/Debit Card",
-								style: TextStyle(
-										fontSize: 16,
-										color: Color(0xFF3a3a3b),
-										fontWeight: FontWeight.w400),
-								textAlign: TextAlign.left,
-							)
-						],
-					),
-				),
-			),
-		);
-	}
-}
-
-class TotalCalculationWidget extends StatelessWidget {
-	@override
-	Widget build(BuildContext context) {
-		return Container(
-			alignment: Alignment.center,
-			width: double.infinity,
-			height: 150,
-			decoration: BoxDecoration(boxShadow: [
-				BoxShadow(
-					color: Color(0xFFfae3e2).withOpacity(0.1),
-					spreadRadius: 1,
-					blurRadius: 1,
-					offset: Offset(0, 1),
-				),
-			]),
-			child: Card(
-				color: Colors.white,
-				elevation: 0,
-				shape: RoundedRectangleBorder(
-					borderRadius: const BorderRadius.all(
-						Radius.circular(5.0),
-					),
-				),
-				child: Container(
-					alignment: Alignment.center,
-					padding: EdgeInsets.only(left: 25, right: 30, top: 10, bottom: 10),
-					child: Column(
-						children: <Widget>[
-							SizedBox(
-								height: 15,
-							),
-							SizedBox(
-								height: 15,
-							),
-							Row(
-								mainAxisAlignment: MainAxisAlignment.spaceBetween,
-								children: <Widget>[
-									Text(
-										"Total",
-										style: TextStyle(
-												fontSize: 18,
-												color: Color(0xFF3a3a3b),
-												fontWeight: FontWeight.w600),
-										textAlign: TextAlign.left,
-									),
-									Text(
-										"\$292",
-										style: TextStyle(
-												fontSize: 18,
-												color: Color(0xFF3a3a3b),
-												fontWeight: FontWeight.w600),
-										textAlign: TextAlign.left,
-									)
-								],
+							Container(
+								margin: EdgeInsets.only(right: 30),
+								child: Text(
+									"\$299.00",
+									style: GoogleFonts.poppins(
+											textStyle: TextStyle(
+													color: AppColors.colorAccent,
+													fontSize: 14)),
+									textAlign: TextAlign.center,
+								),
 							),
 						],
 					),
-				),
+					SizedBox(height: 8),
+					RaisedButton(
+						onPressed: () {
+							Navigator.push(context,
+								new MaterialPageRoute(builder: (context) => CheckOutPage()));
+						},
+						color: AppColors.PrimaryDarkColor,
+						padding: EdgeInsets.only(top: 12, left: 60, right: 60, bottom: 12),
+						shape: RoundedRectangleBorder(
+								borderRadius: BorderRadius.all(Radius.circular(24))),
+						child: Text(
+							"Checkout",	style: GoogleFonts.poppins(
+								textStyle: TextStyle(
+										color: AppColors.white,
+										fontSize: 14)),
+							textAlign: TextAlign.center,
+						),
+					),
+					SizedBox(height: 8),
+				],
 			),
+			margin: EdgeInsets.only(top: 16),
 		);
 	}
-}
-
-class PromoCodeWidget extends StatelessWidget {
-	@override
-	Widget build(BuildContext context) {
+	PromoCodeWidget() {
 		return SafeArea(
 			child: Container(
 				padding: EdgeInsets.only(left: 3, right: 3),
@@ -472,58 +394,43 @@ class PromoCodeWidget extends StatelessWidget {
 			),
 		);
 	}
-}
 
 
-class AddToCartMenu extends StatelessWidget {
-	int productCounter;
 
-	AddToCartMenu(this.productCounter);
 
-	@override
-	Widget build(BuildContext context) {
-		return Container(
-			child: Row(
-				mainAxisAlignment: MainAxisAlignment.center,
-				children: <Widget>[
-					IconButton(
+	void _AddQuantity(BuildContext context, Cart cartlist,int quantity) async {
 
-						icon: Icon(Icons.remove),
-						color: Colors.black,
-						iconSize: 18,
-					),
-					InkWell(
-						onTap: () => print('hello'),
-						child: Container(
-							width: 100.0,
-							height: 35.0,
-							decoration: BoxDecoration(
-								color: Color(0xFFfd2c2c),
-								border: Border.all(color: Colors.white, width: 2.0),
-								borderRadius: BorderRadius.circular(5.0),
-							),
-							child: Center(
-								child: Text(
-									'Add To $productCounter',
-									style: new TextStyle(
-											fontSize: 12.0,
-											color: Colors.white,
-											fontWeight: FontWeight.w300),
-								),
-							),
-						),
-					),
-					IconButton(
-						onPressed: () {},
-						icon: Icon(Icons.add),
-						color: Color(0xFFfd2c2c),
-						iconSize: 18,
-					),
-				],
-			),
-		);
+		int result = await databaseHelper.updateQuantityCart(cartlist.id,cartlist.quantity++);
+		if (result != 0) {
+			_showSnackBar(context, cartlist.productName+' added to cart');
+			updateListView();
+		}
 	}
+	void _RemoveQuantity(BuildContext context, Cart note,int quantity) async {
+		if (note.quantity <= 0) {
+			_delete(context,note);
+		}
+		else {
+			int result = await databaseHelper.updateQuantityCart(
+					note.id, note.quantity--);
+			if (result != 0) {
+				_showSnackBar(context, note.productName+' removed from cart');
+					updateListView();
+			}
+		}
+	}
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
