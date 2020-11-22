@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/Constants.dart';
+import 'package:flutter_app/models/Cart.dart';
 import 'package:flutter_app/utils/CustomTextStyle.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
 
 class CheckOutPage extends StatefulWidget {
+  CheckOutPage(List<Cart> cartList);
+
   @override
   _CheckOutPageState createState() => _CheckOutPageState();
 }

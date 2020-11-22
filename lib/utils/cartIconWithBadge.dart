@@ -3,7 +3,9 @@ import 'package:flutter_app/constants/Constants.dart';
 import 'package:flutter_app/screens/CartList.dart';
 
 class cartIconWithBadge extends StatelessWidget {
-  int counter = 30;
+  int counter ;
+  cartIconWithBadge({Key key, this.counter}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/Constants.dart';
 import 'package:flutter_app/models/Cart.dart';
@@ -49,7 +50,7 @@ class CartListState extends State<CartList> {
 					backgroundColor: AppColors.PrimaryDarkColor,
 					title: Text("MyHome"),
 					actions: <Widget>[
-			cartIconWithBadge()
+		  	  cartIconWithBadge(counter: cartList.length,)
 		]
 
 		),
@@ -81,7 +82,7 @@ class CartListState extends State<CartList> {
 									),
 									footer(context),
 									SizedBox(
-										height: 10,
+										height: 20,
 									),
 									],
 							),
@@ -93,17 +94,7 @@ class CartListState extends State<CartList> {
 			),
 
 
-	    floatingActionButton: FloatingActionButton(
-		    onPressed: () {
-		      debugPrint('FAB clicked');
-		      navigateToDetail(Cart('123456', 1,'Hilla Restaurant', 2,'Pizza','123',2000,1,''), 'Add Cart');
-		    },
 
-		    tooltip: 'Add Cart',
-
-		    child: Icon(Icons.add),
-
-	    ),
     );
 
 
@@ -149,7 +140,7 @@ class CartListState extends State<CartList> {
 	  }
   }
 
-  void updateListView() {
+	void updateListView() {
 
 		final Future<Database> dbFuture = databaseHelper.initializeDatabase();
 		dbFuture.then((database) {
@@ -157,15 +148,16 @@ class CartListState extends State<CartList> {
 			Future<List<Cart>> noteListFuture = databaseHelper.getNoteList("123456");
 			noteListFuture.then((noteList) {
 				setState(() {
-				  this.cartList = noteList;
-				  this.count = noteList.length;
+					this.cartList = noteList;
+					this.count = noteList.length;
 				});
 			});
 		});
-  }
+	}
+
 
 	Widget getNoteListView() {
-
+		_calcTotal();
 
 		return ListView.builder(
 			itemCount: count,
@@ -289,14 +281,22 @@ class CartListState extends State<CartList> {
 
 
 
+	int _total ;
+	void _calcTotal() async{
+		_total = (await databaseHelper.getTotalPrice());
+		print(_total);
+		setState(() => _total );
+	}
+
 	createSubTitle() {
 		return Container(
 			alignment: Alignment.topLeft,
 			child: Text(
 				"Total Items : "+cartList.length.toString(),	style: GoogleFonts.poppins(
 					textStyle: TextStyle(
-							color: AppColors.colorAccent,
-							fontSize: 14)),
+							color: AppColors.PrimaryDarkColor,
+							fontSize: 16,
+					fontWeight: FontWeight.bold)),
 				textAlign: TextAlign.center,
 			),
 			margin: EdgeInsets.only(left: 12, top: 4),
@@ -318,14 +318,13 @@ class CartListState extends State<CartList> {
 									style: GoogleFonts.poppins(
 											textStyle: TextStyle(
 													color: AppColors.colorAccent,
-													fontSize: 14)),
+													fontSize: 15)),
 									textAlign: TextAlign.center,
 								),
 							),
 							Container(
-								margin: EdgeInsets.only(right: 30),
-								child: Text(
-									"\$299.00",
+								margin: EdgeInsets.only(right: 10),
+								child: Text(_total.toString() != null ? _total.toString() : 'loading ...',
 									style: GoogleFonts.poppins(
 											textStyle: TextStyle(
 													color: AppColors.colorAccent,
@@ -337,9 +336,10 @@ class CartListState extends State<CartList> {
 					),
 					SizedBox(height: 8),
 					RaisedButton(
-						onPressed: () {
+						onPressed: () async {
+
 							Navigator.push(context,
-								new MaterialPageRoute(builder: (context) => CheckOutPage()));
+								new MaterialPageRoute(builder: (context) => CheckOutPage(cartList)));
 						},
 						color: AppColors.PrimaryDarkColor,
 						padding: EdgeInsets.only(top: 12, left: 60, right: 60, bottom: 12),

@@ -1,4 +1,5 @@
 
+import 'dart:convert';
 import 'dart:ffi';
 
 class Cart {
@@ -100,16 +101,33 @@ class Cart {
 		this._dateTime = map['DateTime'];
 	}
 
-	Map<String,dynamic> toJson(){
+	Map<String,dynamic> toJson() {
 		return {
 
-		"OrderID":this._orderID,
-			"ProductID": this._productID,
-			"ProductName": this._productName,
+
+		'OrderID': this._orderID,
+		'ProviderID': this._providerID,
+		'ProductID': this._productID,
+			'ProductPrice': this._productPrice,
+	    'Quantity': this._quantity,
+			'TotalSum': this._productPrice*this._quantity,
+			'DateTime': DateTime.now().toString(),
 
 		};
+
 	}
+
+
+
+
+
+
+
 }
+
+
+
+
 
 
 

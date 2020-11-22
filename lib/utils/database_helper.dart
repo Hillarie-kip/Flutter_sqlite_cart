@@ -42,6 +42,8 @@ class DatabaseHelper {
 		return _database;
 	}
 
+
+
 	Future<Database> initializeDatabase() async {
 		// Get the directory path for both Android and iOS to store database.
 		Directory directory = await getApplicationDocumentsDirectory();
@@ -111,12 +113,27 @@ class DatabaseHelper {
 		int result = Sqflite.firstIntValue(x);
 		return result;
 	}
-	Future<int> getTotalPrice(String orderID) async {
+	Future<int> getTotalPrice() async {
 		Database db = await this.database;
-		List<Map<String, dynamic>> x = await db.rawQuery('SELECT SUM(Quantity*ProductPrice) from $orderItemTable');
+		List<Map<String, dynamic>> x = await db.rawQuery('SELECT SUM(Quantity*ProductPrice)Total from $orderItemTable');
 		int result = Sqflite.firstIntValue(x);
 		return result;
 
+	}
+
+	Future calculateTotal() async {
+		var dbClient = await this.database;
+		var result = await dbClient.rawQuery("SELECT SUM(Quantity*ProductPrice)Total from $orderItemTable");
+		print(result);
+		return result;
+	}
+
+	Future DeleteOrderItems() async {
+		var dbClient = await database;
+		await dbClient.transaction((txn) async {
+			await txn.execute("DELETE FROM $orderItemTable");
+		//	await txn.execute("DELETE FROM Posts");
+		});
 	}
 
 	// Get the 'Map List' [ List<Map> ] and convert it to 'Product List' [ List<Product> ]
@@ -136,15 +153,6 @@ class DatabaseHelper {
 
 
 
-	static List encondeToJson(List<Cart>list){
-		List jsonList = List();
-		list.map((item)=>
-				jsonList.add(item.toJson())
-		).toList();
-		print("jsonList: $jsonList");
-		return jsonList;
-
-	}
 
 
 

@@ -242,7 +242,7 @@ class CartDetailState extends State<CartDetail> {
 			title: Text(title),
 			content: Text(message),
 		);
-		Future.delayed(Duration(seconds: 5), () {
+		Future.delayed(Duration(seconds: 1), () {
 			Navigator.of(context).pop(true);
 		});
 		showDialog(
